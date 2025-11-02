@@ -38,7 +38,11 @@ namespace gtcp
 
                 if (new string(fid.Take(15).ToArray()) == "@gtcp:callback:")
                 {
-                    callbacks[new string(fid.Skip(15).ToArray())].DynamicInvoke(data.Skip(1).ToArray());
+                    Thread t = new Thread(() =>{
+                        callbacks[new string(fid.Skip(15).ToArray())].DynamicInvoke(data.Skip(1).ToArray());
+                    });
+                    t.Start();
+                    
                     callbacks.Remove(new string(fid.Skip(15).ToArray()));
                     return;
                 }
@@ -67,7 +71,8 @@ namespace gtcp
                         }
                     }
                 }
-                event2callback[data[0]].DynamicInvoke(data.Skip(1).ToArray());
+                Thread t = new Thread(() =>{ event2callback[data[0]].DynamicInvoke(data.Skip(1).ToArray()); });
+                t.Start();
             }
             if (lengths.Sum() < bytes.Length - 8) handleBytes(bytes.Skip(8 + lengths.Sum()).ToArray());
         }
